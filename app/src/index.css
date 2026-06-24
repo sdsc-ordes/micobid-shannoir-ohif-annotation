@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────
+   MicoBID / Shanoir Annotation Panel
+   Clean corporate UI · single sans · restrained palette
+   ───────────────────────────────────────────────────────────────── */
+
+@layer base {
+  html, body, #root { height: 100%; }
+
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    font-size: 14px;
+  }
+
+  ::selection { background: #0F766E; color: white; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: #94A3B8; background-clip: padding-box; border: 2px solid transparent; }
+
+  input[type="checkbox"] {
+    accent-color: #0F766E;
+    width: 15px; height: 15px;
+    cursor: pointer;
+  }
+}
+
+@layer components {
+
+  /* ─── labels & captions ─── */
+
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-wide text-slate-500;
+  }
+  .caption {
+    @apply text-[12px] text-slate-500;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ─── buttons ─── */
+
+  .btn {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium
+           border rounded-md transition-colors cursor-pointer
+           select-none whitespace-nowrap;
+    height: 32px;
+  }
+  .btn-sm    { @apply text-[12px] px-2.5 py-1; height: 26px; }
+  .btn-primary {
+    @apply bg-brand-700 border-brand-700 text-white
+           hover:bg-brand-800 hover:border-brand-800;
+  }
+  .btn-secondary {
+    @apply bg-white border-slate-300 text-slate-800
+           hover:bg-slate-50 hover:border-slate-400;
+  }
+  .btn-ghost {
+    @apply bg-transparent border-transparent text-slate-700
+           hover:bg-slate-100;
+  }
+  .btn-danger {
+    @apply bg-white border-red-300 text-red-700
+           hover:bg-red-50 hover:border-red-400;
+  }
+  .btn:disabled { @apply opacity-40 cursor-not-allowed pointer-events-none; }
+
+  /* ─── inputs ─── */
+
+  .field {
+    @apply bg-white border border-slate-300 rounded-md px-3 py-1.5 text-sm
+           text-slate-900 placeholder:text-slate-400
+           focus:outline-none focus:ring-2 focus:ring-brand-600/30 focus:border-brand-600
+           transition-colors;
+    height: 32px;
+  }
+  .field-sm { @apply text-[12px] px-2 py-1; height: 26px; }
+
+  .select { @apply field appearance-none pr-7 cursor-pointer; }
+  .select-arrow {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='none' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 10px 6px;
+  }
+
+  /* ─── card / surface ─── */
+
+  .card {
+    @apply bg-white border border-slate-200 rounded-lg;
+  }
+
+  /* ─── status mark ─── */
+
+  .mark {
+    @apply inline-flex items-center gap-1.5 text-[13px];
+  }
+  .mark-dot {
+    width: 7px; height: 7px;
+    border-radius: 9999px;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* ─── density visualization ─── */
+
+  .density-cell {
+    flex: 1 1 0;
+    min-width: 3px;
+    height: 100%;
+    transition: opacity 0.15s;
+  }
+  .density-cell:hover { opacity: 0.6; }
+
+  /* ─── table ─── */
+
+  .data-table {
+    @apply w-full text-[13px] border-collapse;
+  }
+  .data-table thead th {
+    @apply label text-left px-3 py-2.5 font-medium
+           border-b border-slate-200 bg-slate-50/50 align-bottom;
+  }
+  .data-table tbody td {
+    @apply px-3 py-2.5 align-middle border-b border-slate-100;
+  }
+  .data-table tbody tr:hover td { background: #F8FAFC; }
+  .data-table tbody tr.selected td {
+    background: #F0FDFA;
+    box-shadow: inset 3px 0 0 #0F766E;
+  }
+
+  .data-table tbody tr.group-row td {
+    @apply pt-5 pb-2 bg-slate-50/40;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .data-table tbody tr.group-row:hover td { background: rgb(248 250 252 / 0.4); }
+
+  /* ─── avatar ─── */
+
+  .avatar {
+    @apply inline-flex items-center justify-center font-medium
+           text-[10px] uppercase tracking-wide rounded-full;
+    width: 24px; height: 24px;
+    background: #E2E8F0;
+    color: #1E293B;
+    flex-shrink: 0;
+  }
+  .avatar-sm { width: 20px; height: 20px; font-size: 9px; }
+  .avatar-lg { width: 32px; height: 32px; font-size: 11px; }
+
+  .avatar-ink     { background: #0F172A; color: #F1F5F9; }
+  .avatar-brand   { background: #0F766E; color: white; }
+  .avatar-rust    { background: #B45309; color: white; }
+  .avatar-moss    { background: #4D7C0F; color: white; }
+  .avatar-slate   { background: #475569; color: white; }
+  .avatar-ochre   { background: #B45309; color: white; }
+
+  /* ─── side rail ─── */
+
+  .rail-section { @apply pb-4 mb-4 border-b border-slate-200; }
+  .rail-section:last-child { @apply mb-0 pb-0 border-b-0; }
+
+  .rail-item {
+    @apply flex items-center justify-between w-full px-2 py-1
+           text-[13px] text-slate-700 rounded
+           hover:bg-slate-100 hover:text-slate-900
+           cursor-pointer transition-colors;
+  }
+  .rail-item.active {
+    @apply bg-brand-50 text-brand-800 font-medium;
+  }
+  .rail-item .count {
+    @apply text-[11px] text-slate-500 num;
+  }
+  .rail-item.active .count { @apply text-brand-700; }
+
+  /* ─── overview metric ─── */
+
+  .metric {
+    @apply flex flex-col gap-0.5 px-4 py-2.5;
+  }
+  .metric:not(:last-child) { @apply border-r border-slate-200; }
+  .metric-value { @apply text-[22px] font-semibold text-slate-900 leading-none num; }
+  .metric-label { @apply text-[11px] uppercase tracking-wide text-slate-500 font-medium; }
+  .metric-sub   { @apply text-[11px] text-slate-500 mt-1; }
+
+  /* ─── links ─── */
+
+  .link {
+    @apply text-brand-700 hover:text-brand-800 hover:underline;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}
