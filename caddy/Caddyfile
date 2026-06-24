@@ -1,0 +1,22 @@
+# Caddyfile — basic-auth front door for the MicoBID / Shanoir Annotation Panel.
+#
+# Reads BASIC_AUTH_USER and BASIC_AUTH_HASH from the container env, populated
+# by docker-compose from caddy/auth.env (see caddy/auth.env.example).
+#
+# Reverse-proxies everything to the Vite dev server. WebSocket upgrades for
+# Vite HMR are handled automatically by `reverse_proxy`.
+{
+	# global options
+	auto_https off
+	admin off
+}
+
+:80 {
+	encode gzip
+
+	basic_auth {
+		{$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
+	}
+
+	reverse_proxy app:5173
+}

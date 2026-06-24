@@ -1,0 +1,34 @@
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/workspace:cached
+      - node_modules:/workspace/app/node_modules
+    working_dir: /workspace/app
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      - NODE_ENV=development
+    # No host port — only reachable to caddy via the internal network.
+    expose:
+      - "5173"
+
+  caddy:
+    image: caddy:2-alpine
+    depends_on:
+      - app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file:
+      - path: ./caddy/auth.env
+        format: raw    # don't interpolate $ in values — bcrypt hashes need literal $
+
+volumes:
+  node_modules:
+  caddy_data:
+  caddy_config:
