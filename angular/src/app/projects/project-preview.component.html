@@ -1,0 +1,128 @@
+@if (!project()) {
+  <div class="pane blank"></div>
+} @else if (!task()) {
+  <!-- project overview -->
+  <div class="pane">
+    <div class="ov-head">
+      <div class="label">Project overview</div>
+      <h3>{{ project()!.name }}</h3>
+    </div>
+    <div class="ov-body">
+      <div>
+        <div class="label mb">Instructions</div>
+        <div class="instructions">
+          @if (project()!.instructions) { {{ project()!.instructions }} } @else { <span class="muted">None</span> }
+        </div>
+      </div>
+
+      @if (isText() && project()!.fields) {
+        <div>
+          <div class="label mb">Fields</div>
+          <div class="chips">
+            @for (f of project()!.fields; track f.id) {
+              <span class="chip">{{ f.label }}@if (f.required) { <span class="req">*</span> }<span class="caption">· {{ f.kind }}</span></span>
+            }
+          </div>
+        </div>
+      }
+
+      @if (!isText() && template()) {
+        <div>
+          <div class="label mb">Labels · {{ template()!.name }}</div>
+          <div class="chips">
+            @for (l of template()!.labels; track l.name) {
+              <span class="chip"><span class="sw" [style.background]="l.color"></span>{{ l.name }}</span>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="caption hint">Select a task to preview its data.</div>
+    </div>
+  </div>
+} @else {
+  <!-- task preview -->
+  <div class="pane">
+    <div class="pv-head">
+      <div class="pv-top">
+        <div class="min0">
+          <div class="label">Preview</div>
+          <h3><span class="mono">#{{ task()!.examId }}</span> · subj {{ exam()?.subjectId }}</h3>
+        </div>
+        <button class="btn btn-ghost btn-sm" (click)="close.emit()">✕</button>
+      </div>
+      <div class="pv-who">
+        <app-avatar [user]="user()" size="sm" />
+        <span class="handle">{{ user()?.handle }}</span>
+        <span class="spacer"></span>
+        <app-status-mark [status]="task()!.status" />
+      </div>
+    </div>
+
+    <div class="pv-body">
+      @if (isText()) {
+        <div class="fields">
+          @for (f of project()!.fields; track f.id) {
+            <div>
+              <div class="label mb">{{ f.label }}</div>
+              <div class="answer">
+                @if (task()!.answers[f.id] && task()!.answers[f.id].trim()) { {{ task()!.answers[f.id] }} }
+                @else { <span class="muted">— empty —</span> }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div>
+          <div class="label mb">Screenshots</div>
+          @if (pngs().length === 0) { <div class="caption none">No screenshots uploaded.</div> }
+          @else {
+            <div class="shots">
+              @for (f of pngs(); track f.filename) {
+                <div class="shot">
+                  <div class="thumb">🖼</div>
+                  <div class="caption mono fn" [title]="f.filename">{{ f.filename }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div>
+          <div class="label mb">DICOM-SEG</div>
+          @if (segs().length === 0) { <div class="caption none">No segmentation uploaded.</div> }
+          @else {
+            <div class="seg-list">
+              @for (f of segs(); track f.filename) {
+                <div class="seg-row">
+                  <span class="badge">SEG</span>
+                  <span class="mono fn" [title]="f.filename">{{ f.filename }}</span>
+                  <span class="caption num sz">{{ f.size | bytes }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="ohif">
+          <a [href]="ohifView()" target="_blank" rel="noreferrer" class="btn btn-sm btn-ghost">View in OHIF</a>
+          <a [href]="ohifEdit()" target="_blank" rel="noreferrer" class="btn btn-sm btn-ghost">Editor</a>
+        </div>
+      }
+    </div>
+
+    <div class="pv-foot">
+      @if (isManager()) {
+        <div class="status-line">
+          <span class="label">Status</span>
+          <select class="field field-sm select" [style.color]="STATUS[task()!.status].bar" (change)="onStatus($event)">
+            @for (s of STATUS_ORDER; track s) { <option [value]="s" [selected]="s === task()!.status">{{ STATUS[s].label }}</option> }
+          </select>
+        </div>
+      }
+      @if (task()!.status !== 'accepted') {
+        <button class="btn btn-primary full" (click)="openEditor.emit(task()!.id)">{{ isText() ? 'Open writing editor' : 'Open annotation task' }}</button>
+      } @else {
+        <button class="btn btn-secondary full" (click)="openEditor.emit(task()!.id)">View task</button>
+      }
+    </div>
+  </div>
+}

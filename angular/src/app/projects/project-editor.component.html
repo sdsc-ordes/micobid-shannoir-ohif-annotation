@@ -1,0 +1,134 @@
+<app-dialog [open]="open()" width="920px" (close)="close.emit()">
+  <div class="editor">
+    <div class="ed-head">
+      <div>
+        <div class="label">Project {{ isNew() ? '· new' : '· ' + (project()?.id ?? '') }}</div>
+        <h3>{{ isNew() ? 'Create project' : 'Edit "' + (project()?.name ?? '') + '"' }}</h3>
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="ed-body">
+      <!-- LEFT -->
+      <div class="col">
+        <div>
+          <label class="label">Name</label>
+          <input type="text" class="field full" [value]="draft().name" (input)="onName($event)" placeholder="e.g. Tumor delineation" />
+        </div>
+
+        <div>
+          <label class="label">Annotation type</label>
+          <div class="type-grid">
+            <button class="type-card" [class.on]="draft().type === 'segmentation'" (click)="set('type', 'segmentation')">
+              <div class="t-name">Segmentation</div><div class="caption">Labels + OHIF + DICOM-SEG</div>
+            </button>
+            <button class="type-card" [class.on]="draft().type === 'text'" (click)="set('type', 'text')">
+              <div class="t-name">Text</div><div class="caption">Free-text fields, no OHIF</div>
+            </button>
+          </div>
+        </div>
+
+        @if (draft().type === 'segmentation') {
+          <div>
+            <label class="label">Label template</label>
+            <select class="field select full" [value]="draft().templateId" (change)="onTemplate($event)">
+              @for (t of templates(); track t.id) { <option [value]="t.id" [selected]="t.id === draft().templateId">{{ t.name }} — {{ t.labels.length }} label{{ t.labels.length !== 1 ? 's' : '' }}</option> }
+            </select>
+            @if (currentTemplate()) {
+              <div class="chips">
+                @for (l of currentTemplate()!.labels; track l.name) {
+                  <span class="chip"><span class="sw" [style.background]="l.color"></span>{{ l.name }}</span>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div>
+            <div class="fields-head">
+              <label class="label">Text fields</label>
+              <button class="btn btn-sm btn-secondary" (click)="addField()">+ Add field</button>
+            </div>
+            <div class="field-list">
+              @for (f of draft().fields; track f.id) {
+                <div class="field-row">
+                  <input type="text" class="field field-sm grow" [value]="f.label" (input)="onFieldLabel($index, $event)" [placeholder]="'Field ' + ($index + 1) + ' label'" />
+                  <select class="field field-sm select" [value]="f.kind" (change)="onFieldKind($index, $event)">
+                    <option value="short" [selected]="f.kind === 'short'">short</option>
+                    <option value="long" [selected]="f.kind === 'long'">long</option>
+                  </select>
+                  <label class="req-lbl caption"><input type="checkbox" [checked]="f.required" (change)="onFieldReq($index, $event)" /> req</label>
+                  <button class="x" [disabled]="draft().fields.length <= 1" (click)="removeField($index)">✕</button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <div>
+          <label class="label">Instructions</label>
+          <textarea class="field full ta" rows="6" [value]="draft().instructions" (input)="onInstructions($event)"
+                    placeholder="Describe what annotators should do, edge cases, what to exclude…"></textarea>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="col rt">
+        <div>
+          <label class="label mb">Members</label>
+          <div class="members">
+            @for (u of annotators; track u.id) {
+              <label class="mrow">
+                <input type="checkbox" [checked]="isMember(u.id)" (change)="toggleMember(u.id)" />
+                <app-avatar [user]="u" size="sm" />
+                <span class="handle">{{ u.handle }}</span>
+                <span class="caption email">{{ u.email }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="label mb">Samples (examinations)</label>
+          <div class="samples">
+            @for (grp of subjects; track grp.subjectId) {
+              <div class="subj-grp">
+                <div class="subj-head">
+                  <div class="subj-id"><span class="label">Subject</span><span class="mono">{{ grp.subjectId }}</span></div>
+                  <button class="link-btn caption" (click)="toggleSubject(grp.list)">{{ allPicked(grp.list) ? 'Deselect' : 'Select all' }}</button>
+                </div>
+                <div class="exams">
+                  @for (e of grp.list; track e.examId) {
+                    <label class="exam">
+                      <input type="checkbox" [checked]="isSample(e.examId)" (change)="toggleSample(e.examId)" />
+                      <span class="mono">#{{ e.examId }}</span>
+                      <span class="caption">{{ e.date }} · {{ e.series.length }} series</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ed-foot">
+      <div class="foot-left">
+        @if (!isNew() && canDelete()) {
+          <button class="btn btn-sm btn-danger" (click)="onDelete()">Delete project</button>
+        } @else { <span></span> }
+        <span class="caption">
+          @if (canSave()) {
+            Will create up to <span class="strong num">{{ taskPreview() }}</span> task{{ taskPreview() !== 1 ? 's' : '' }} (samples × members)
+          } @else {
+            Name, ≥1 member, ≥1 sample required
+          }
+        </span>
+      </div>
+      <div class="foot-actions">
+        <button class="btn btn-ghost" (click)="close.emit()">Cancel</button>
+        <button class="btn btn-primary" [disabled]="!canSave()" (click)="handleSave()">{{ isNew() ? 'Create project' : 'Save changes' }}</button>
+      </div>
+    </div>
+  </div>
+</app-dialog>
