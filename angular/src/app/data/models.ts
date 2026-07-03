@@ -53,6 +53,7 @@ export interface Template {
   color: string;
   labels: Label[];
   screenshotPattern: string;
+  instructions?: string;
 }
 
 export interface ProjectField {

@@ -1,0 +1,68 @@
+<app-dialog [open]="open()" width="820px" (close)="close.emit()">
+  <div class="editor">
+    <div class="ed-head">
+      <div>
+        <div class="label">Template {{ isNew() ? '· new' : '· ' + (template()?.id ?? '') }}</div>
+        <h3>{{ isNew() ? 'Create template' : 'Edit "' + (template()?.name ?? '') + '"' }}</h3>
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="ed-body">
+      <div class="name-row">
+        <div>
+          <label class="label">Name</label>
+          <input type="text" class="field" [value]="draft().name" (input)="onName($event)" placeholder="e.g. Tumor + components" />
+        </div>
+        <div>
+          <label class="label">Accent</label>
+          <div class="color-box">
+            <input type="color" [value]="draft().color" (input)="onColor($event)" />
+            <span class="hex mono">{{ draft().color.toUpperCase() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="caption note">A template is a reusable label set. Per-project instructions live on the project.</div>
+
+      <div class="labels">
+        <div class="labels-head">
+          <label class="label">Labels</label>
+          <button class="btn btn-sm btn-secondary" (click)="addLabel()">+ Add label</button>
+        </div>
+        <div class="label-list">
+          @for (l of draft().labels; track $index) {
+            <div class="label-row">
+              <div class="color-box sm">
+                <input type="color" [value]="l.color" (input)="onLabelColor($index, $event)" />
+                <span class="hex mono">{{ l.color.toUpperCase() }}</span>
+              </div>
+              <input type="text" class="field field-sm name-input" [value]="l.name" (input)="onLabelName($index, $event)" [placeholder]="'Label ' + ($index + 1) + ' name'" />
+              <button class="x" [disabled]="draft().labels.length <= 1" (click)="removeLabel($index)" title="Remove label">✕</button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div>
+        <label class="label">Screenshot filename pattern</label>
+        <input type="text" class="field mono pattern" [value]="draft().screenshotPattern" (input)="onPattern($event)" />
+        <div class="caption vars">
+          Variables:
+          <code>&#123;study&#125;</code> <code>&#123;exam&#125;</code> <code>&#123;subject&#125;</code>
+          <code>&#123;annotator&#125;</code> <code>&#123;ts&#125;</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="ed-foot">
+      @if (!isNew() && canDelete()) {
+        <button class="btn btn-sm btn-danger" (click)="onDelete()">Delete template</button>
+      } @else { <span></span> }
+      <div class="foot-actions">
+        <button class="btn btn-ghost" (click)="close.emit()">Cancel</button>
+        <button class="btn btn-primary" [disabled]="!canSave()" (click)="handleSave()">{{ isNew() ? 'Create template' : 'Save changes' }}</button>
+      </div>
+    </div>
+  </div>
+</app-dialog>
