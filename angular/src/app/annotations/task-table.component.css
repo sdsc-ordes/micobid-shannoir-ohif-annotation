@@ -1,0 +1,35 @@
+.table-wrap { overflow-x: auto; }
+.empty { padding: 48px; text-align: center; }
+.empty-title { font-size: 14px; font-weight: 600; color: var(--grey-dark); margin-bottom: 4px; }
+.mono { font-family: "Open Sans", monospace; }
+
+.w-chk { width: 28px; }
+.ar { text-align: right; }
+
+.group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.group-id { display: flex; align-items: baseline; gap: 8px; }
+.subj { font-size: 13px; color: var(--grey-dark); }
+.link-btn { background: none; border: none; cursor: pointer; font: inherit; }
+.link-btn:hover { color: var(--brand); text-decoration: underline; }
+
+.exam-top { display: flex; align-items: center; gap: 8px; }
+.series { margin-top: 2px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pip { display: inline-flex; align-items: center; gap: 6px; }
+.pip .sw { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.pname { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag { font-size: 9px; text-transform: uppercase; padding: 1px 4px; border-radius: 2px; background: var(--bg-panel); color: var(--grey-mid); }
+
+.assignee { display: inline-flex; align-items: center; gap: 8px; }
+.handle { font-size: 12px; }
+.x { background: none; border: none; cursor: pointer; color: var(--grey-mid); font-size: 12px; padding: 0 2px; }
+.x:hover { color: var(--error); }
+
+.status-select { background: transparent; border: none; font: inherit; cursor: pointer; padding: 2px 4px; }
+.status-select:focus { outline: 1px solid var(--accent-soft); }
+
+.out { display: inline-flex; align-items: center; gap: 6px; }
+.badge { font-size: 9px; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; background: #e2e2e2; color: #555; }
+
+.row-actions { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.row-actions .btn { text-decoration: none; }

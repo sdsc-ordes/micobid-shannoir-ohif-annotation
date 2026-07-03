@@ -1,0 +1,133 @@
+@if (filtered().length === 0) {
+  <div class="card empty">
+    <div class="empty-title">No tasks match the filters</div>
+    <div class="caption">Adjust the sidebar filters, or create tasks from the Projects tab.</div>
+  </div>
+} @else {
+  <div class="card table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="w-chk">
+            @if (isManager()) {
+              <input type="checkbox" [checked]="allSelected()" (change)="onSelectAll($event)" />
+            }
+          </th>
+          <th>Examination</th>
+          <th>Date</th>
+          <th>Project</th>
+          <th>Assignee</th>
+          <th>Status</th>
+          <th>Output</th>
+          <th>Replicas</th>
+          <th class="ar">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (g of grouped(); track g.subjectId) {
+          <tr class="group-row">
+            <td colspan="9">
+              <div class="group-head">
+                <div class="group-id">
+                  <span class="label">Subject</span>
+                  <span class="num subj">{{ g.subjectId }}</span>
+                  <span class="caption">· {{ subjectExamCount(g.subjectId) }} exam{{ subjectExamCount(g.subjectId) !== 1 ? 's' : '' }} · {{ subjectTaskCount(g.subjectId) }} task{{ subjectTaskCount(g.subjectId) !== 1 ? 's' : '' }}</span>
+                </div>
+                @if (isManager()) {
+                  <button class="link-btn caption" (click)="store.selectSubject(g.subjectId, !subjectAllSelected(g.rows))">
+                    {{ subjectAllSelected(g.rows) ? 'Deselect subject' : 'Select all in subject' }}
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+
+          @for (t of g.rows; track t.id) {
+            <tr [class.selected]="isSelected(t)">
+              <td>
+                @if (isManager()) {
+                  <input type="checkbox" [checked]="isSelected(t)" (change)="onSelect(t, $event)" />
+                }
+              </td>
+
+              <td>
+                <div class="exam">
+                  <div class="exam-top">
+                    <a [href]="shanoirExamUrl(t.examId)" target="_blank" rel="noreferrer" class="link num mono">#{{ t.examId }}</a>
+                    <span class="caption">· {{ exam(t).series.length }} series</span>
+                  </div>
+                  <div class="caption series" [title]="seriesTitle(t)">{{ seriesPreview(t) }}</div>
+                </div>
+              </td>
+
+              <td class="mono caption num">{{ exam(t).date }}</td>
+
+              <td>
+                @if (project(t); as p) {
+                  <span class="pip"><span class="sw" [style.background]="p.color"></span><span class="pname">{{ p.name }}</span><span class="tag">{{ p.type === 'text' ? 'txt' : 'seg' }}</span></span>
+                } @else { <span class="caption"><em>—</em></span> }
+              </td>
+
+              <td>
+                @if (user(t); as u) {
+                  <span class="assignee">
+                    <app-avatar [user]="u" size="sm" /><span class="handle">{{ u.handle }}</span>
+                    @if (isManager()) {
+                      <button class="x" title="Remove task" (click)="store.unassign(t.id)">✕</button>
+                    }
+                  </span>
+                } @else { <span class="caption"><em>unassigned</em></span> }
+              </td>
+
+              <td>
+                @if (isManager()) {
+                  <select class="status-select" [style.color]="STATUS[t.status].bar" (change)="onStatus(t, $event)">
+                    @for (s of statusList; track s.id) { <option [value]="s.id" [selected]="s.id === t.status">{{ s.label }}</option> }
+                  </select>
+                } @else {
+                  <app-status-mark [status]="t.status" />
+                }
+              </td>
+
+              <td>
+                @if (isText(t)) {
+                  @if (answerCount(t) > 0) {
+                    <span class="out"><span class="badge">TXT</span><span class="num">{{ answerCount(t) }}/{{ fieldCount(t) }}</span></span>
+                  } @else { <span class="caption">—</span> }
+                } @else {
+                  @if (segCount(t) + pngCount(t) === 0) {
+                    <span class="caption">—</span>
+                  } @else {
+                    <span class="out">
+                      @if (segCount(t) > 0) { <span class="badge">SEG</span><span class="num">{{ segCount(t) }}</span> }
+                      @if (pngCount(t) > 0) { <span class="badge">IMG</span><span class="num">{{ pngCount(t) }}</span> }
+                    </span>
+                  }
+                }
+              </td>
+
+              <td><app-replica-strip [tasks]="replicas(t)" /></td>
+
+              <td class="ar">
+                <div class="row-actions">
+                  @if (!isText(t)) {
+                    <a [href]="ohifUrl(t)" target="_blank" rel="noreferrer" class="btn btn-sm btn-ghost" title="Open OHIF (read-only)">View</a>
+                  }
+                  @if (canWork(t) && t.status !== 'accepted') {
+                    <button class="btn btn-sm btn-primary" (click)="store.openAnnotate(t.id)">{{ isText(t) ? 'Write' : 'Annotate' }}</button>
+                  }
+                  @if (canWork(t) && t.status === 'accepted') {
+                    <button class="btn btn-sm btn-ghost" (click)="store.openAnnotate(t.id)">Open</button>
+                  }
+                  @if (canReview(t)) {
+                    <button class="btn btn-sm btn-secondary" (click)="store.openReview(t.examId, t.projectId)" title="Review all submissions">Review</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+}
