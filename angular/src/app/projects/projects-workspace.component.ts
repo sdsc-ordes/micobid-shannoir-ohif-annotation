@@ -19,7 +19,8 @@ import { ProjectEditor } from './project-editor.component';
       [collapsed]="treeCollapsed()"
       (selectProject)="selectProject($event)"
       (selectTask)="selectTaskFromTree($event)"
-      (expand)="treePinned.set(true)" />
+      (expand)="treePinned.set(true)"
+      (collapse)="treePinned.set(false)" />
 
     <app-project-browser
       [projects]="visible()"
@@ -27,9 +28,11 @@ import { ProjectEditor } from './project-editor.component';
       [selectedProjectId]="selectedProjectId()"
       [isManager]="isManager()"
       [collapsed]="browserCollapsed()"
+      [canCollapse]="!!selectedTask()"
       (select)="selectProject($event)"
       (newProject)="openNew()"
-      (expand)="browserPinned.set(true)" />
+      (expand)="browserPinned.set(true)"
+      (collapse)="browserPinned.set(false)" />
 
     <app-project-task-list
       [project]="project()"

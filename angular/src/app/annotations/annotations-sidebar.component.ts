@@ -59,12 +59,17 @@ import { Avatar } from '../shared/avatar.component';
     </aside>
   `,
   styles: [`
-    .sidebar { width: 232px; flex-shrink: 0; background: #fff; border-right: 1px solid var(--grey-border);
-               padding: 14px 10px; overflow-y: auto; }
-    .sec { padding: 0 8px; margin-bottom: 8px; display: block; }
+    .sidebar { width: 232px; flex-shrink: 0; background: var(--bg-alt); border-right: 1px solid var(--grey-border);
+               padding: 0; overflow-y: auto; }
+    .rail-section { padding: 12px 0; margin: 0; border-bottom: 1px solid #e6e2ec; }
+    .sec { padding: 0 14px; margin-bottom: 6px; display: block; color: var(--brand); font-weight: 700; letter-spacing: .05em; }
+    .sidebar .rail-item { border-radius: 0; padding: 6px 14px; }
+    .sidebar .rail-item:hover { background: var(--accent-soft); }
+    .sidebar .rail-item.active { background: #fff; color: var(--brand); box-shadow: inset 3px 0 0 var(--brand); }
+    .sidebar .rail-item.active .count { color: var(--brand); font-weight: 700; }
     .rail-item .lbl { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
-    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 130px; }
-    .footer { padding: 8px; margin-top: 8px; line-height: 1.5; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 122px; }
+    .footer { padding: 12px 14px; line-height: 1.5; }
     .muted { color: #aaa; }
   `],
 })

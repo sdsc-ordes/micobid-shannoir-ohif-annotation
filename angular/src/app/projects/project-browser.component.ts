@@ -24,9 +24,14 @@ import { Avatar } from '../shared/avatar.component';
       <div class="pane">
         <div class="head">
           <span class="label">Projects · {{ projects().length }}</span>
-          <div class="modes">
-            <button class="mbtn" [class.on]="mode() === 'card'" (click)="mode.set('card')" title="Cards">▦</button>
-            <button class="mbtn" [class.on]="mode() === 'list'" (click)="mode.set('list')" title="List">≣</button>
+          <div class="head-right">
+            <div class="modes">
+              <button class="mbtn" [class.on]="mode() === 'card'" (click)="mode.set('card')" title="Cards">▦</button>
+              <button class="mbtn" [class.on]="mode() === 'list'" (click)="mode.set('list')" title="List">≣</button>
+            </div>
+            @if (canCollapse()) {
+              <button class="collapse" title="Collapse projects" (click)="collapse.emit()">‹</button>
+            }
           </div>
         </div>
 
@@ -75,6 +80,9 @@ import { Avatar } from '../shared/avatar.component';
 
     .pane { width: 276px; flex-shrink: 0; background: var(--bg-alt); border-right: 1px solid var(--grey-border); display: flex; flex-direction: column; }
     .head { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-bottom: 1px solid var(--grey-border); background: #fff; }
+    .head-right { display: flex; align-items: center; gap: 6px; }
+    .collapse { background: none; border: none; cursor: pointer; color: var(--grey-mid); font-size: 15px; line-height: 1; width: 22px; height: 22px; border-radius: 3px; }
+    .collapse:hover { background: var(--bg-panel); color: var(--brand); }
     .modes { display: flex; border: 1px solid var(--grey-border); border-radius: 2px; overflow: hidden; }
     .mbtn { padding: 2px 7px; border: none; background: #fff; color: var(--grey-mid); cursor: pointer; }
     .mbtn.on { background: var(--btn); color: #fff; }
@@ -108,10 +116,12 @@ export class ProjectBrowser {
   selectedProjectId = input<string | null>(null);
   isManager = input<boolean>(false);
   collapsed = input<boolean>(false);
+  canCollapse = input<boolean>(false);
 
   select = output<string>();
   newProject = output<void>();
   expand = output<void>();
+  collapse = output<void>();
 
   mode = signal<'card' | 'list'>('card');
   readonly userById = userById;

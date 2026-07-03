@@ -18,7 +18,12 @@ import { MiniBar } from '../shared/mini-bar.component';
       </div>
     } @else {
       <div class="pane">
-        <div class="label hd">Outline</div>
+        <div class="hd-row">
+          <span class="label">Outline</span>
+          @if (selectedProjectId()) {
+            <button class="collapse" title="Collapse outline" (click)="collapse.emit()">‹</button>
+          }
+        </div>
         <div class="tree">
           @for (p of projects(); track p.id) {
             <div class="p-row" [class.sel]="p.id === selectedProjectId()">
@@ -63,7 +68,9 @@ import { MiniBar } from '../shared/mini-bar.component';
     .dot.on { outline: 2px solid var(--brand); outline-offset: 1px; }
 
     .pane { width: 220px; flex-shrink: 0; background: #fff; border-right: 1px solid var(--grey-border); overflow-y: auto; }
-    .hd { padding: 14px 12px 8px; display: block; }
+    .hd-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 8px; }
+    .collapse { background: none; border: none; cursor: pointer; color: var(--grey-mid); font-size: 15px; line-height: 1; width: 22px; height: 22px; border-radius: 3px; }
+    .collapse:hover { background: var(--bg-panel); color: var(--brand); }
     .tree { padding-bottom: 14px; }
     .mono { font-family: "Open Sans", monospace; font-size: 12px; }
     .p-row { display: flex; align-items: center; gap: 4px; padding: 5px 6px; margin: 0 4px; border-radius: 2px; }
@@ -94,6 +101,7 @@ export class ProjectTreePane {
   selectProject = output<string>();
   selectTask = output<{ projectId: string; taskId: string }>();
   expand = output<void>();
+  collapse = output<void>();
 
   readonly STATUS = STATUS;
   readonly examById = examById;
