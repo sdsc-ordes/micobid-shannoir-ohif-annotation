@@ -1,0 +1,86 @@
+@if (review() && exam(); as _) {
+  <div class="backdrop" (click)="close()">
+    <div class="drawer" (click)="$event.stopPropagation()">
+      <div class="head">
+        <div class="head-top">
+          <div>
+            <div class="proj"><span class="sw" [style.background]="project()?.color"></span><span class="label">Review · {{ project()?.name }}</span></div>
+            <h3>Compare annotations</h3>
+            <div class="caption sub">
+              Subject <span class="mono">{{ exam()!.subjectId }}</span> ·
+              <a [href]="shanoirExamUrl(exam()!.examId)" target="_blank" rel="noreferrer" class="link">exam #{{ exam()!.examId }}</a> ·
+              {{ exam()!.date }} · {{ exam()!.series.length }} series
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" (click)="close()">✕</button>
+        </div>
+        @if (!isText()) {
+          <div class="ohif">
+            <a [href]="ohifView()" target="_blank" rel="noreferrer" class="btn btn-primary">View in OHIF</a>
+            <a [href]="ohifEdit()" target="_blank" rel="noreferrer" class="btn btn-secondary">Segmentation editor</a>
+          </div>
+        }
+      </div>
+
+      <div class="body">
+        @if (tasks().length === 0) { <div class="caption">No annotators assigned.</div> }
+        @for (t of tasks(); track t.id) {
+          <article class="card sub-card">
+            <header class="sc-head">
+              <div class="who">
+                <app-avatar [user]="userById(t.assigneeId)" size="lg" />
+                <div>
+                  <div class="handle">{{ userById(t.assigneeId)?.handle }}</div>
+                  <div class="caption">{{ userById(t.assigneeId)?.role }} · updated {{ t.updatedAt }}</div>
+                </div>
+              </div>
+              <span class="mark"><span class="mark-dot" [style.background]="STATUS[t.status].bar"></span>{{ STATUS[t.status].label }}</span>
+            </header>
+
+            @if (isText()) {
+              @if (hasAnswers(t)) {
+                <div class="answers">
+                  @for (f of project()!.fields; track f.id) {
+                    <div>
+                      <div class="label mb">{{ f.label }}</div>
+                      <div class="answer">
+                        @if (t.answers[f.id] && t.answers[f.id].trim()) { {{ t.answers[f.id] }} } @else { <span class="muted">— empty —</span> }
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else { <div class="caption none">No answers yet.</div> }
+            } @else {
+              @if (t.submissions.length === 0) { <div class="caption none">No files uploaded yet.</div> }
+              @else {
+                <div class="files">
+                  @for (f of files(t); track f.filename) {
+                    <div class="file-row">
+                      <span class="badge">{{ f.kind === 'seg' ? 'SEG' : 'IMG' }}</span>
+                      <span class="mono fn">{{ f.filename }}</span>
+                      <span class="caption num">{{ f.size | bytes }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            <div class="actions">
+              @if (t.status === 'submitted') {
+                <button class="btn btn-sm btn-alt" (click)="setStatus(t.id, 'accepted')">✓ Accept</button>
+                <button class="btn btn-sm btn-danger" (click)="setStatus(t.id, 'revisions')">Request revisions</button>
+              }
+              @if (t.status === 'accepted') { <span class="caption ok">✓ Accepted</span> }
+              @if (t.status === 'revisions') { <span class="caption err">Revisions requested</span> }
+              @if (t.status === 'todo' || t.status === 'in_progress') {
+                <button class="btn btn-sm btn-secondary" (click)="setStatus(t.id, 'submitted')">Mark submitted</button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="foot caption">esc to close</div>
+    </div>
+  </div>
+}

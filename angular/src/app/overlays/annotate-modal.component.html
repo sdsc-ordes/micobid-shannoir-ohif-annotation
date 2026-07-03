@@ -1,0 +1,167 @@
+@if (task() && project() && exam(); as _) {
+  <div class="backdrop" (click)="close()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <!-- HEADER -->
+      <div class="head">
+        <div>
+          <div class="proj">
+            <span class="sw" [style.background]="project()!.color"></span>
+            <span class="label">{{ project()!.name }}</span>
+            <span class="type">{{ isText() ? 'text' : 'segmentation' }}</span>
+          </div>
+          <h3>Annotate subject <span class="mono">{{ exam()!.subjectId }}</span><span class="dim"> · exam </span>
+            <a [href]="shanoirExamUrl(exam()!.examId)" target="_blank" rel="noreferrer" class="link mono">#{{ exam()!.examId }}</a>
+          </h3>
+          <div class="caption sub">
+            {{ exam()!.date }} · {{ exam()!.series.length }} series · assigned to <span class="who">{{ assignee()?.handle ?? '—' }}</span>
+            @if (!canWork()) { <span class="warn"> · view only (not your task)</span> }
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" (click)="close()">✕</button>
+      </div>
+
+      <!-- BODY -->
+      <div class="body">
+        <section>
+          <div class="label mb">① Instructions</div>
+          <pre class="instructions">{{ project()!.instructions }}</pre>
+        </section>
+
+        @if (isText()) {
+          <section>
+            <div class="label mb">② Your annotation</div>
+            <div class="fields">
+              @for (f of project()!.fields; track f.id) {
+                <div>
+                  <label class="flbl">{{ f.label }}@if (f.required) { <span class="req">*</span> }</label>
+                  @if (f.kind === 'long') {
+                    <textarea class="field full ta" rows="4" [value]="answers()[f.id] || ''" [disabled]="!canWork() || locked()"
+                              (input)="setAnswer(f.id, $event)" [placeholder]="canWork() ? 'Write the ' + f.label.toLowerCase() + '…' : ''"></textarea>
+                  } @else {
+                    <input type="text" class="field full" [value]="answers()[f.id] || ''" [disabled]="!canWork() || locked()"
+                           (input)="setAnswer(f.id, $event)" [placeholder]="canWork() ? f.label + '…' : ''" />
+                  }
+                </div>
+              }
+            </div>
+            <div class="caption mt">Want to view the images while writing? <a [href]="ohifView()" target="_blank" rel="noreferrer" class="link">Open OHIF viewer</a></div>
+          </section>
+        } @else {
+          <section>
+            <div class="sec-head">
+              <div class="label">② Segmentation labels — copy into OHIF</div>
+              <button class="btn btn-sm btn-secondary" (click)="copy(labelsBlock(), 'all-labels')">{{ copied() === 'all-labels' ? '✓ Copied all' : 'Copy all (' + (template()?.labels?.length ?? 0) + ')' }}</button>
+            </div>
+            <div class="label-grid">
+              @for (l of template()?.labels ?? []; track l.name) {
+                <div class="lcard">
+                  <div class="lcard-head">
+                    <span class="lsw" [style.background]="l.color"></span>
+                    <span class="lname">{{ l.name }}</span>
+                    <span class="mono lhex">{{ l.color }}</span>
+                  </div>
+                  <div class="lcard-copy">
+                    <pre class="lsnippet mono">{{ l.name }}	{{ l.color }}</pre>
+                    <button class="cbtn" (click)="copy(l.name + '\t' + l.color, 'lbl-' + l.name)">{{ copied() === 'lbl-' + l.name ? '✓' : 'Copy' }}</button>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+
+          <section>
+            <div class="label mb">③ Screenshot &amp; DICOM-SEG file names</div>
+            <div class="copy-rows">
+              <div class="crow">
+                <div class="ckey">Screenshot</div>
+                <code class="cval mono">{{ screenshotFilename() }}</code>
+                <button class="cbtn" (click)="copy(screenshotFilename(), 'ss-name')">{{ copied() === 'ss-name' ? '✓ Copied' : 'Copy' }}</button>
+              </div>
+              <div class="crow">
+                <div class="ckey">DICOM-SEG</div>
+                <code class="cval mono">{{ segDefaultFilename() }}</code>
+                <button class="cbtn" (click)="copy(segDefaultFilename(), 'seg-name')">{{ copied() === 'seg-name' ? '✓ Copied' : 'Copy' }}</button>
+              </div>
+            </div>
+            <div class="caption mt">Use these exact names — username + timestamp keep submissions traceable.</div>
+          </section>
+
+          <section>
+            <div class="label mb">④ Open OHIF</div>
+            <div class="ohif">
+              <a [href]="ohifEdit()" target="_blank" rel="noreferrer" class="btn btn-primary">Open segmentation editor →</a>
+              <a [href]="ohifView()" target="_blank" rel="noreferrer" class="btn btn-secondary">View only</a>
+              <span class="caption uid">UID <code class="mono">{{ exam()!.studyInstanceUID }}</code></span>
+            </div>
+          </section>
+
+          <section class="upload-sec">
+            <div class="sec-head">
+              <div class="label">⑤ Upload annotation files</div>
+              <div class="caption">{{ segCount() }} SEG · {{ pngCount() }} screenshot</div>
+            </div>
+            @if (canWork() && !locked()) {
+              <div class="drops">
+                <div class="drop">
+                  <div class="dtitle">DICOM-SEG (.dcm)</div>
+                  <div class="caption mb">From OHIF "Download DICOM SEG".</div>
+                  <input #segInput type="file" accept=".dcm,application/dicom" multiple hidden (change)="onFilePick('seg', $event)" />
+                  <button class="btn btn-sm btn-secondary full" (click)="segInput.click()">+ Add DICOM-SEG</button>
+                </div>
+                <div class="drop">
+                  <div class="dtitle">Screenshots (.png / .jpg)</div>
+                  <div class="caption mb">For visual review. Optional.</div>
+                  <input #pngInput type="file" accept="image/png,image/jpeg" multiple hidden (change)="onFilePick('screenshot', $event)" />
+                  <button class="btn btn-sm btn-secondary full" (click)="pngInput.click()">+ Add screenshots</button>
+                </div>
+              </div>
+            }
+            @if (task()!.submissions.length > 0 || stagedFiles().length > 0) {
+              <div class="file-list">
+                @for (f of task()!.submissions; track $index) {
+                  <div class="file-row old">
+                    <span class="badge">{{ f.kind === 'seg' ? 'SEG' : 'IMG' }}</span>
+                    <span class="mono fn">{{ f.filename }}</span>
+                    <span class="caption num">{{ f.size | bytes }}</span>
+                    <span class="caption">· {{ f.uploadedAt }}</span>
+                  </div>
+                }
+                @for (f of stagedFiles(); track $index) {
+                  <div class="file-row staged">
+                    <span class="badge stg">{{ f.kind === 'seg' ? 'SEG' : 'IMG' }}</span>
+                    <span class="mono fn">{{ f.filename }}</span>
+                    <span class="caption num">{{ f.size | bytes }}</span>
+                    <span class="stg-tag">staged</span>
+                    <button class="x" (click)="removeStaged($index)">✕</button>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+        }
+      </div>
+
+      <!-- FOOTER -->
+      <div class="foot">
+        <div class="foot-left">
+          @if (isManager()) {
+            <label class="status-line"><span class="label">Status</span>
+              <select class="field field-sm select" [style.color]="STATUS[task()!.status].bar" (change)="onStatus($event)">
+                @for (s of STATUS_ORDER; track s) { <option [value]="s" [selected]="s === task()!.status">{{ STATUS[s].label }}</option> }
+              </select>
+            </label>
+          } @else {
+            <span class="mark"><span class="mark-dot" [style.background]="STATUS[task()!.status].bar"></span>{{ STATUS[task()!.status].label }}</span>
+          }
+          <span class="caption">· updated {{ task()!.updatedAt }}</span>
+        </div>
+        <div class="foot-actions">
+          <button class="btn btn-ghost" (click)="close()">Close</button>
+          @if (canWork() && !locked()) {
+            <button class="btn btn-primary" [disabled]="!hasWork()" (click)="handleSave()">{{ isText() ? 'Save annotation' : 'Save' + (stagedFiles().length ? ' (' + stagedFiles().length + ')' : '') }}</button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
