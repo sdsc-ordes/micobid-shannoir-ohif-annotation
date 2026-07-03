@@ -1,0 +1,12 @@
+# Dev container for the Angular (Shanoir-styled) annotation panel.
+# Mirrors app/Dockerfile.dev but for the Angular port. Node 22 (Angular 21 needs ≥20.19/22.12).
+FROM node:22-alpine
+
+WORKDIR /workspace/angular
+
+# Angular CLI's dev server binds to 4200; only reachable to caddy on the internal network.
+EXPOSE 4200
+
+# Deps are installed at runtime against the mounted volume so the image stays thin;
+# the compose file mounts the repo and a named volume for node_modules.
+CMD ["sh", "-c", "npm install && npx ng serve --host 0.0.0.0 --port 4200 --allowed-hosts all"]

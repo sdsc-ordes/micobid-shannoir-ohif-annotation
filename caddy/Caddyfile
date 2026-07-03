@@ -11,6 +11,7 @@
 	admin off
 }
 
+# React app (always on).
 :80 {
 	encode gzip
 
@@ -19,4 +20,16 @@
 	}
 
 	reverse_proxy app:5173
+}
+
+# Angular (Shanoir-styled) app — only reachable when the `angular` compose
+# profile is running (otherwise the upstream is simply absent).
+:81 {
+	encode gzip
+
+	basic_auth {
+		{$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
+	}
+
+	reverse_proxy angular:4200
 }

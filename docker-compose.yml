@@ -14,12 +14,30 @@ services:
     expose:
       - "5173"
 
+  # Angular (Shanoir-styled) port of the same panel. Optional — enable with:
+  #   docker compose --profile angular up -d --build
+  angular:
+    build:
+      context: ./angular
+      dockerfile: Dockerfile.dev
+    profiles: ["angular"]
+    volumes:
+      - .:/workspace:cached
+      - angular_node_modules:/workspace/angular/node_modules
+    working_dir: /workspace/angular
+    environment:
+      - NODE_ENV=development
+    # No host port — only reachable to caddy via the internal network.
+    expose:
+      - "4200"
+
   caddy:
     image: caddy:2-alpine
     depends_on:
       - app
     ports:
-      - "8080:80"
+      - "8080:80"   # React app
+      - "8081:81"   # Angular app (only serves once the `angular` profile is up)
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -30,5 +48,6 @@ services:
 
 volumes:
   node_modules:
+  angular_node_modules:
   caddy_data:
   caddy_config:
